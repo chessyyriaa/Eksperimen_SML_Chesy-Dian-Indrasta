@@ -1,0 +1,41 @@
+name: Automate Data Preprocessing
+
+on:
+  push:
+    paths:
+      - 'data_raw/**'
+      - 'automate_Chesy.py'
+      - '.github/workflows/main.yml' 
+  workflow_dispatch:
+
+jobs:
+  preprocess:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pandas scikit-learn numpy
+
+    - name: Run Preprocessing Script
+      run: python automate_Chesy.py
+
+    - name: Check Output File
+      run: ls -l preprocessing/
+
+    - name: Commit and Push Changes
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        git add preprocessing/churn_data_clean.csv
+        git commit -m "Auto-update: Preprocessed data" || echo "No changes to commit"
+        git push
